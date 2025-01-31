@@ -1,0 +1,33 @@
+[project]
+name = "pytooling"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Wyko ter Haar",email = "wyko.ter.haar@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.ruff]
+line-length = 120
+preview = true
+fix = true
+unsafe-fixes = true
+
+[tool.ruff.lint]
+select = ["E", "F", "D4", "PT", "PL", "C90", "Q", "SIM", "PTH", "FIX", "ERA"]
+extend-select = ["I"]
+ignore = ["PLR6301", "PLR2004", "PLC1901", "PLR0904"]
+# ignore-init-module-imports = false
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
