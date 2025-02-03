@@ -1,5 +1,5 @@
 [project]
-name = "pytooling"
+name = "pyChainTool"
 version = "0.1.1"
 description = ""
 authors = [
@@ -8,6 +8,7 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "certifi (>=2025.1.31,<2026.0.0)"
 ]
 
 
@@ -53,4 +54,5 @@ search = "version = \"{current_version}\""
 replace = "version = \"{new_version}\""
 [tool.poetry.group.dev.dependencies]
 bump-my-version = "^0.31.1"
+pytest = "^8.3.4"
 
