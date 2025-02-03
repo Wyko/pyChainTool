@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Verify certificates and their associated chain from a remote host.
+Verify certificates and their associated chains from a remote host.
 
 This module allows for much more basic certificate validation than `cryptography`'s (although full validation
 is also an option here). The original use case for this tool was to validate that a remote host was
