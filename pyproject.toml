@@ -1,6 +1,6 @@
 [project]
 name = "pytooling"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = [
     {name = "Wyko ter Haar",email = "wyko.ter.haar@gmail.com"}
@@ -31,3 +31,26 @@ ignore = ["PLR6301", "PLR2004", "PLC1901", "PLR0904"]
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
 unfixable = []
+
+[tool.pylint.messages_control]
+max-line-length = 120
+disable = ["W1203", "broad-exception-caught"]
+
+[tool.bumpversion]
+current_version = "0.1.1"
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
+serialize = ["{major}.{minor}.{patch}"]
+allow_dirty = true
+
+[[tool.bumpversion.files]]
+filename = ".version"
+search = "{current_version}"
+replace = "{new_version}"
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = "version = \"{current_version}\""
+replace = "version = \"{new_version}\""
+[tool.poetry.group.dev.dependencies]
+bump-my-version = "^0.31.1"
+
