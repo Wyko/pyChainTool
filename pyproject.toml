@@ -1,6 +1,6 @@
 [project]
 name = "pyChainTool"
-version = "0.1.1"
+version = "1.0.0"
 description = ""
 authors = [
     {name = "Wyko ter Haar",email = "wyko.ter.haar@gmail.com"}
@@ -38,7 +38,7 @@ max-line-length = 120
 disable = ["W1203", "broad-exception-caught"]
 
 [tool.bumpversion]
-current_version = "0.1.1"
+current_version = "1.0.0"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
 serialize = ["{major}.{minor}.{patch}"]
 allow_dirty = true
