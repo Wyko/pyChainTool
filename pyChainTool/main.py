@@ -39,9 +39,20 @@ class CertVerifier:
     VerificationResult(
         host='google.com',
         results=[
-            SingleVerification('Has_root', Passed=True, Message='Found root certificate CN=GTS Root R1,O=Google Trust Services LLC,C=US'),
+            SingleVerification(
+                'Has_root',
+                Passed=True,
+                Message='Found root certificate CN=GTS Root R1,O=Google Trust Services LLC,C=US'
+            ),
             SingleVerification('All_signed_by_any', Passed=True),
-            SingleVerification('Full_cryptographic', Passed=False, Message='Problem validating the certificate: validation failed: Other("EE keyUsage must not assert keyCertSign")')
+            SingleVerification(
+                'Full_cryptographic',
+                Passed=False,
+                Message=(
+                    'Problem validating the certificate: validation failed: '
+                    'Other("EE keyUsage must not assert keyCertSign")'
+                )
+            )
         ]
     )
 
@@ -151,8 +162,10 @@ class CertVerifier:
             self._trust_store = _get_trusted_certs_from_certifi()
 
         elif isinstance(self.trust, list):
-            # TODO: Implement this
-            raise NotImplementedError()
+            if not all((isinstance(x, Certificate) for x in self.trust)):
+                raise ValueError("Trust entries given as a list must all be x509.Certificate objects.")
+
+            self._trust_store = self.trust
 
         elif isinstance(self.trust, Path):
             self._trust_store = _get_trusted_certs_from_path(self.trust)
@@ -222,6 +235,13 @@ class CertVerifier:
             "to sign any certificate in the chain."
         )
         return result
+
+    def __setattr__(self, name, value):
+        """Intercept calls to update the trust since we cache the trust and otherwise the new value wouldn't be used."""
+        if name == "trust":
+            logger.debug("Clearing cached trust store")
+            self._trust_store = None
+        super(CertVerifier, self).__setattr__(name, value)
 
 
 def _get_root(certs: list[Certificate], trusted_certs: list[Certificate] = None) -> Certificate | None:
@@ -410,10 +430,8 @@ def _get_trusted_certs_from_certifi() -> list[Certificate]:
 
 
 if __name__ == "__main__":
-    # verifier = CertVerifier("incomplete-chain.badssl.com")
-    # r = verifier.verify(verifications=[Verification.ALL_SIGNED_BY_ANY])
+    # verifier = CertVerifier("incomplete-chain.badssl.com")  # noqa: ERA001
+    # r = verifier.verify(verifications=[Verification.ALL_SIGNED_BY_ANY])  # noqa: ERA001
     verifier = CertVerifier("google.com", trust="certifi")
     r = verifier.verify()
     rich.print(r)
-
-    pass
