@@ -77,8 +77,8 @@ class CertVerifier:
             trust (str | list[Certificate] | Path | None, optional): The trusted certificates to use to validate the
             certificate. Defaults to None. The options are:
 
-            - `str`: If `"certifi"`, then the `certifi` package is used to establish a trust store using the a set of
-                default certificates. No other string is accepted.
+            - `str`: If `"certifi"`, then the `certifi` package is used to establish a trust store using a set of
+                default certificates from Mozilla. No other string is accepted.
 
             - `Path`: Load all of the certificates loaded in the given folder and use them as a trust store.
                 The certificates should be PEM-formatted.
@@ -151,11 +151,12 @@ class CertVerifier:
 
         """
         if self._trust_store is not None:
-            logger.debug("Returning cached trusted certs.")
+            logger.debug("Returning cached trusted certs")
             return self._trust_store
 
         logger.debug("Loading trusted certs")
         if self.trust is None:
+            logger.warning("Trust store set to an empty list since no trust was supplied")
             self._trust_store = []
 
         elif self.trust == "certifi":
@@ -163,7 +164,7 @@ class CertVerifier:
 
         elif isinstance(self.trust, list):
             if not all((isinstance(x, Certificate) for x in self.trust)):
-                raise ValueError("Trust entries given as a list must all be x509.Certificate objects.")
+                raise ValueError("Trust entries given as a list must all be x509.Certificate objects")
 
             self._trust_store = self.trust
 

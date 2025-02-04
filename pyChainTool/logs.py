@@ -13,7 +13,7 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 def setup_logging(logger: logging.Logger, level: int = logging.DEBUG) -> None:
     """Set up the logger to output to a file and to the console."""
 
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.WARNING)
 
     # Send all logs (including DEBUG) to a log file
     fp_logs = OUTPUT_DIR / "logs.txt"
