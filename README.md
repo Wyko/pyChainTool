@@ -9,7 +9,7 @@ is also an option here). The original use case for this tool was to validate tha
 presenting intermediates, even if we didn't posses the root certificate in our own trust stores (i.e. for
 basic device configuration verification when a client supplies their own self-signed certificates).
 
-It also was designed to validate the validity of a certificate against a custom trust store, totally ignoring
+It also was designed to verify the validity of a certificate against a custom trust store, totally ignoring
 the system trust store.
 
 This tool presents a few different verification options, of which you can select one or more to run sequentially.
