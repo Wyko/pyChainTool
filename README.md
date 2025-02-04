@@ -18,8 +18,8 @@ It will return an object containing the results of the verifications.
 ## Usage
 
 ```python
->> r = CertVerifier("google.com", trust="certifi").verify()
->> rich.print(r)
+>>> r = CertVerifier("google.com", trust="certifi").verify()
+>>> rich.print(r)
 
 VerificationResult(
     host='google.com',

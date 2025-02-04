@@ -26,7 +26,7 @@ unsafe-fixes = true
 [tool.ruff.lint]
 select = ["E", "F", "D4", "PT", "PL", "C90", "Q", "SIM", "PTH", "FIX", "ERA"]
 extend-select = ["I"]
-ignore = ["PLR6301", "PLR2004", "PLC1901", "PLR0904"]
+ignore = ["PLR6301", "PLR2004", "PLC1901", "PLR0904", "PLR0913", "PLR0917"]
 # ignore-init-module-imports = false
 
 # Allow fix for all enabled rules (when `--fix`) is provided.

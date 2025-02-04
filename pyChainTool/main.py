@@ -1,3 +1,9 @@
+"""The main entry point to the verification system.
+
+Users should import the `CertVerifier` class and create a new instance, supplying (at least) a valid host (a remote
+url) to pull a certificate chain from. Then call the instance's `.verify()` method to perform the checks.
+"""
+
 import contextlib
 import socket
 from pathlib import Path
@@ -16,28 +22,61 @@ logger = root_logger.getChild(__name__)
 
 
 class CertVerifier:
+    """Verify certificates and their associated chain from a remote host.
+
+    This module allows for much more basic certificate validation than Cryptography's (although full validation
+    is an option here). The original use case for this tool was to validate that a remote host was
+    presenting intermediates, even if I didn't posses the root certificate in my own trust store.
+
+    It also was designed to validate the validity of a certificate against a custom trust store, totally ignoring
+    the system trust store.
+
+    Usage:
+    -----
+
+    >>> r = CertVerifier("google.com", trust="certifi").verify()
+    >>> rich.print(r)
+    VerificationResult(
+        host='google.com',
+        results=[
+            SingleVerification('Has_root', Passed=True, Message='Found root certificate CN=GTS Root R1,O=Google Trust Services LLC,C=US'),
+            SingleVerification('All_signed_by_any', Passed=True),
+            SingleVerification('Full_cryptographic', Passed=False, Message='Problem validating the certificate: validation failed: Other("EE keyUsage must not assert keyCertSign")')
+        ]
+    )
+
+    """
+
     def __init__(
         self,
         host: str,
         port: int = 443,
+        trust: str | list[Certificate] | Path | None = None,
         proxy_host: str = None,
         proxy_port: int = 8080,
         fallback: bool = False,
-        trust: str | list[Certificate] | Path | None = None,
     ):
-        """Verify certificates and their associated chain from a remote host.
-
-        This module allows for much more basic certificate validation than Cryptography's (although full validation
-        is an option here). The original use case for this tool was to validate that a remote host was
-        presenting intermediates, even if I didn't posses the root certificate in my own trust store.
-
-        It also was designed to validate the validity of a certificate against a custom trust store, totally ignoring
-        the system trust store.
+        """Create a new instance of the CertVerifier.
 
         Args:
             host (str): The web address for the host.
 
             port (int, optional): The port to conenct to the host on. Defaults to 443.
+
+            trust (str | list[Certificate] | Path | None, optional): The trusted certificates to use to validate the
+            certificate. Defaults to None. The options are:
+
+            - `str`: If `"certifi"`, then the `certifi` package is used to establish a trust store using the a set of
+                default certificates. No other string is accepted.
+
+            - `Path`: Load all of the certificates loaded in the given folder and use them as a trust store.
+                The certificates should be PEM-formatted.
+
+            - `list[Certificate]`: Use the given certificates as the trust.
+
+            - `None`: Do not use a trust store. The server must supply a root certificate itself to validate chain
+                signing, and the connection will probably fail any strict validation since no certificate is
+                trusted.
 
             proxy_host (str, optional): An optional proxy host to use.
 
@@ -46,16 +85,6 @@ class CertVerifier:
 
             fallback (bool, optional): Whether to try connecting directly to the host if the proxy is supplied but
             doesn't work. Defaults to False.
-
-            trust (str | list[Certificate] | Path | None, optional): The trusted certificates to use to validate the
-            certificate. Defaults to None.
-                - str: If "certifi", the the certifi package is used to establish trust store using the system default
-                certificates. No other string is accepted.
-                - Path: Load all of the certificates loaded in the given folder and use them as a trust store.
-                The certificates should be PEM-formatted.
-                - list[Certificate]: Use the given certificates as the trust.
-                - None: Do not use a trust store. The server must supply a root certificate itself to validate chain
-                signing, and the connection will probably fail any strict validation since no certificate is trusted.
 
             timeout (int, optional): The timeout for the connection, in seconds.
 
@@ -90,7 +119,7 @@ class CertVerifier:
         try:
             chain_certs = self.get_chain()
         except Exception as err:
-            raise LookupError("Problem getting the certificate chain from the source.") from err
+            raise LookupError(f"Problem getting the certificate chain from {self.host}.") from err
 
         if do_all or Verification.HAS_ROOT in verifications:
             result.results.append(self._verify_chain_has_root(chain_certs))
