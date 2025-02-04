@@ -35,7 +35,7 @@ VerificationResult(
 These are the currently available verification options. 
 
 The enum for these options (the `Verification` class, used in 
-the `verify()` function parameters to select which checks to run) can be found in the `modules.py` file.
+the `verify()` function parameters to select which checks to run) can be found in the `models.py` file.
 
 
 - **HAS_ROOT**: Verify that we can find a root certificate for the presented chain.
