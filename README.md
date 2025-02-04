@@ -2,12 +2,12 @@
 
 ## Introduction
 
-Verify certificates and their associated chain from a remote host.
+Verify certificates and their associated chains from a remote host.
 
 This module allows for much more basic certificate validation than `cryptography`'s (although full validation
 is also an option here). The original use case for this tool was to validate that a remote host was
 presenting intermediates, even if we didn't posses the root certificate in our own trust stores (i.e. for
-basic device configuration verification).
+basic device configuration verification when a client supplies their own self-signed certificates).
 
 It also was designed to validate the validity of a certificate against a custom trust store, totally ignoring
 the system trust store.
