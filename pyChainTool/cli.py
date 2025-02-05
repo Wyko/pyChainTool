@@ -1,3 +1,5 @@
+"""The command line interface to the package."""
+
 import logging
 from typing import Annotated
 
@@ -5,9 +7,8 @@ import rich
 import typer
 from typer import Typer
 
-from pyChainTool.logs import root_logger
-from pyChainTool.main import CertVerifier
-from pyChainTool.models import Verification
+from pyChainTool import logs
+from pyChainTool.main import CertVerifier, Verification
 
 app = Typer()
 
@@ -74,9 +75,9 @@ def verify(
     """Download the certificate chain from a remote host and then run one or more verification checks against it."""
 
     if verbose > 0:
-        root_logger.setLevel(logging.DEBUG)
+        logs.set_logger_level(logging.DEBUG)
     else:
-        root_logger.setLevel(logging.WARNING)
+        logs.set_logger_level(logging.WARNING)
 
     verifier = CertVerifier(
         host=host,

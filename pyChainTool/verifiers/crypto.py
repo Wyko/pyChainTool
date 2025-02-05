@@ -3,7 +3,10 @@
 from cryptography.x509 import Certificate, DNSName
 from cryptography.x509.verification import PolicyBuilder, Store
 
+from pyChainTool.logs import get_logger
 from pyChainTool.models import SingleVerification, Verification
+
+logger = get_logger(__name__)
 
 
 def verify_full_cryptographic(
@@ -20,6 +23,7 @@ def verify_full_cryptographic(
         SingleVerification: The result of the verification
 
     """
+    logger.debug("Starting full cryptographic verification.")
     result = SingleVerification(verification_type=Verification.FULL_CRYPTOGRAPHIC)
 
     try:
@@ -39,4 +43,5 @@ def verify_full_cryptographic(
         return result
 
     result.passed = True
+    logger.debug("Full cryptographic verification passed.")
     return result

@@ -6,13 +6,14 @@
 import rich
 from cryptography.x509 import Certificate
 
+import pyChainTool.ops
 from pyChainTool import main
 
 
 def test__get_trusted_certs_from_certifi():
     """Validate that _get_trusted_certs_from_certifi loads certificates correctly."""
 
-    certs = main._get_trusted_certs_from_certifi()
+    certs = pyChainTool.ops.get_trusted_certs_from_certifi()
     assert len(certs)
     assert isinstance(certs[0], Certificate)
 

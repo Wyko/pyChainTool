@@ -2,16 +2,16 @@ import contextlib
 
 from cryptography.x509 import Certificate
 
-from pyChainTool.logs import root_logger
+from pyChainTool.logs import get_logger
 from pyChainTool.models import SingleVerification, Verification
 
-logger = root_logger.getChild(__name__)
+logger = get_logger(__name__)
 
 
 def _verify_cert_signed_by_any(
     cert: Certificate, chain_certs: list[Certificate], trusted_certs: list[Certificate]
 ) -> None | Certificate:
-    """Verify that the given certificate is signed by a certificate in the given list of Certificates.
+    """Verify that the given certificate is signed by any certificate in the trust store or list of certificates.
 
     Args:
         cert (Certificate): The certificate to validate
