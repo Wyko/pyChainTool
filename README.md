@@ -15,7 +15,7 @@ the system trust store.
 This tool presents a few different verification options, of which you can select one or more to run sequentially.
 It will return an object containing the results of the verifications. 
 
-## Usage
+## Usage: Python
 
 ```python
 >>> from pyChainTool import CertVerifier
@@ -32,15 +32,22 @@ VerificationResult(
 )
 ```
 
-## CLI Documentation
+## Usage: CLI
 
-This tool can be run directly from a terminal after installation via `pip`. 
 
+**Commands**:
+
+* `verify`: Download the certificate chain from a...
+* `list`: List the available verification checks.
+
+## `verify`
+
+Download the certificate chain from a remote host and then run one or more verification checks against it.
 
 **Usage**:
 
 ```console
-$ chaintool [OPTIONS] HOST
+$ verify [OPTIONS] HOST
 ```
 
 **Arguments**:
@@ -49,39 +56,36 @@ $ chaintool [OPTIONS] HOST
 
 **Options**:
 
-* `-c, --check [has_root|all_signed_by_any|full_cryptographic]`: The verifications to perform against the downloaded certificate. 
+* `-c, --check TEXT`: The verifications to perform against the downloaded certificate. 
 
-    You may specify this one or more times with the names of the checks you want to perform, or omit this to
-    run all possible checks.
+You may specify this one or more times with the names of the checks you want to perform, or omit this to
+run all possible checks.
 * `-p, --port INTEGER`: The port to connect to the remote host on.  [default: 443]
-* `-t, --trust TEXT`: The trusted certificates to use to validate the chain loaded from the remote host. 
-
-    If you specify `"certifi"`, then the `certifi` package is used to establish a trust store using a set of
-    default certificates from Mozilla. Any other string is interpreted as a filepath. This filepath should
-    point to a folder containing certificates in PEM format. 
-
-    If this option is not specified, **no trust store will be used**. The server must supply a root certificate 
-    itself to validate chain signing, and the connection will probably fail most checks since 
-    no certificate is trusted. This can still be useful to pass some basic verifications.
+* `-t, --trust TEXT`: The trusted certificates to use to validate the chain loaded from the remote host. This should be
+a file path pointing to a folder containing certificates in PEM format. If this option is not 
+specified, the default is to use the certificates supplied by the certifi package, which uses the Mozilla
+default certificates.  [default: certifi]
+* `-n, --no-trust`: If this option is specified, no trust store will be used. The server must supply a root certificate 
+itself to validate chain signing, and the connection will probably fail any strict validation since 
+no certificate is trusted. This can still be useful to pass some basic verifications.
+This option overrides the trust option if it is supplied.
 * `--proxy TEXT`: If specified, use the specified proxy server to create a connection to the remote host.
 * `--proxy-port INTEGER`: The port for the proxy, if specified.  [default: 8080]
-* `-f, --fallback`: Whether to try connecting directly to the host if the proxy is supplied but doesn&#x27;t work. Defaults to False.
-* `-v, --verbose`: Enable debug logging.
+* `-f, --fallback`: Whether to try connecting directly to the host if the proxy is supplied butdoesn&#x27;t work. Defaults to False.
+* `-v, --verbose`: [default: 0]
 * `--help`: Show this message and exit.
 
+## `list`
 
+List the available verification checks.
 
-## Verifications
-These are the currently available verification options. 
+**Usage**:
 
-The enum for these options (the `Verification` class, used in 
-the `verify()` function parameters to select which checks to run) can be found in `pyChainTool.models`.
+```console
+$ list [OPTIONS]
+```
 
+**Options**:
 
-- **HAS_ROOT**: Verify that we can find a root certificate for the presented chain.
-
-- **ALL_SIGNED_BY_ANY**: Verify that each certificate is signed by another certificate in the chain, including a known root.
-
-- **FULL_CRYPTOGRAPHIC**: Verify the certificate using Cryptography's server verifier module. This should be the most complete verification possible.
-
+* `--help`: Show this message and exit.
 

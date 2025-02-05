@@ -29,8 +29,6 @@ def setup_logging(console_level: int = logging.DEBUG) -> None:
     console_handler.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
     logger.addHandler(console_handler)
 
-    logger.debug("Configured logging for " + logger.name)
-
 
 def is_console_handler(handler: logging.Handler) -> bool:
     """Check if a logging handler is connected to the console.
