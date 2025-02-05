@@ -18,6 +18,7 @@ It will return an object containing the results of the verifications.
 ## Usage
 
 ```python
+>>> from pyChainTool import CertVerifier
 >>> r = CertVerifier("google.com", trust="certifi").verify()
 >>> rich.print(r)
 
@@ -30,6 +31,45 @@ VerificationResult(
     ]
 )
 ```
+
+## CLI Documentation
+
+This tool can be run directly from a terminal after installation via `pip`. 
+
+
+**Usage**:
+
+```console
+$ chaintool [OPTIONS] HOST
+```
+
+**Arguments**:
+
+* `HOST`: The hostname/URL of the remote host to download the certificate and chain from.  [required]
+
+**Options**:
+
+* `-c, --check [has_root|all_signed_by_any|full_cryptographic]`: The verifications to perform against the downloaded certificate. 
+
+    You may specify this one or more times with the names of the checks you want to perform, or omit this to
+    run all possible checks.
+* `-p, --port INTEGER`: The port to connect to the remote host on.  [default: 443]
+* `-t, --trust TEXT`: The trusted certificates to use to validate the chain loaded from the remote host. 
+
+    If you specify `"certifi"`, then the `certifi` package is used to establish a trust store using a set of
+    default certificates from Mozilla. Any other string is interpreted as a filepath. This filepath should
+    point to a folder containing certificates in PEM format. 
+
+    If this option is not specified, **no trust store will be used**. The server must supply a root certificate 
+    itself to validate chain signing, and the connection will probably fail most checks since 
+    no certificate is trusted. This can still be useful to pass some basic verifications.
+* `--proxy TEXT`: If specified, use the specified proxy server to create a connection to the remote host.
+* `--proxy-port INTEGER`: The port for the proxy, if specified.  [default: 8080]
+* `-f, --fallback`: Whether to try connecting directly to the host if the proxy is supplied but doesn&#x27;t work. Defaults to False.
+* `-v, --verbose`: Enable debug logging.
+* `--help`: Show this message and exit.
+
+
 
 ## Verifications
 These are the currently available verification options. 

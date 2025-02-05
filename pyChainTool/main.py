@@ -85,7 +85,7 @@ class CertVerifier:
 
             - `list[Certificate]`: Use the given certificates as the trust.
 
-            - `None`: Do not use a trust store. The server must supply a root certificate itself to validate chain
+            - `None`: no trust store will be used. The server must supply a root certificate itself to validate chain
                 signing, and the connection will probably fail any strict validation since no certificate is
                 trusted.
 
