@@ -10,8 +10,7 @@
             "args": [
                 "verify",
                 "google.com",
-                "-vt",
-                "C:\\Users\\AU21FN\\Coding\\Repos\\P08914-Onsight\\onsight\\resources\\ING-Certs"
+                "-v",
             ]
         },
         {

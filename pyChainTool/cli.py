@@ -10,7 +10,7 @@ from rich.padding import Padding
 from typer import Typer
 
 from pyChainTool import checks, logs
-from pyChainTool.main import CertVerifier, Verification
+from pyChainTool.main import CertVerifier
 
 app = Typer()
 
@@ -21,7 +21,7 @@ def verify(
         str, typer.Argument(help="The hostname/URL of the remote host to download the certificate and chain from.")
     ],
     verifications: Annotated[
-        list[Verification],
+        list[str],
         typer.Option(
             "--check",
             "-c",
