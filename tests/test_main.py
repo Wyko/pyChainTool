@@ -7,7 +7,7 @@ import rich
 from cryptography.x509 import Certificate
 
 import pyChainTool.ops
-from pyChainTool import main
+from pyChainTool import checks, main
 
 
 def test__get_trusted_certs_from_certifi():
@@ -23,6 +23,7 @@ def test__verify_google_all_certifi():
     result = verifier.verify()
     rich.print(result)
     assert result
+    assert len(result.results) == len(checks.get_verifiers())
 
 
 def test_updting_trust_updates_cache():

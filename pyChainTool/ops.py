@@ -170,7 +170,7 @@ def get_chain(
     return _get_chain_from_connection(host, conn)
 
 
-def get_trusted_certs_from_path(fp: Path) -> list[Certificate]:
+def get_trusted_certs_from_path(fp: Path | str) -> list[Certificate]:
     """Load all the certificates in a path.
 
     Args:
@@ -181,6 +181,9 @@ def get_trusted_certs_from_path(fp: Path) -> list[Certificate]:
 
     """
     logger.debug("Loading trusted certificates from path %s", str(fp))
+    if isinstance(fp, str):
+        fp = Path(fp)
+
     trusted_certs = [load_pem_x509_certificate(file.read_bytes()) for file in fp.glob("*")]
     return trusted_certs
 

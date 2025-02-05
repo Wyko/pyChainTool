@@ -1,5 +1,5 @@
 """Top level imports to make the tool easier to use."""
 
-__all__ = ["CertVerifier", "Verification"]
+__all__ = ["CertVerifier"]
 
-from pyChainTool.main import CertVerifier, Verification
+from pyChainTool.main import CertVerifier

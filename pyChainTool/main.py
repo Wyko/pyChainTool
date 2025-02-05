@@ -9,11 +9,9 @@ from pathlib import Path
 import rich
 from cryptography.x509 import Certificate
 
-from pyChainTool import ops
+from pyChainTool import checks, guard, ops
 from pyChainTool.logs import get_logger
-from pyChainTool.models import SingleVerification, Verification, VerificationResult
-from pyChainTool.verifiers.crypto import verify_full_cryptographic
-from pyChainTool.verifiers.validate_cert_chain import verify_cert_chain_all_signed_by_any
+from pyChainTool.models import VerificationResult
 
 logger = get_logger(__name__)
 
@@ -107,11 +105,11 @@ class CertVerifier:
 
         self._trust_store: list[Certificate] | None = None
 
-    def verify(self, verifications: list[Verification] = None) -> VerificationResult:
+    def verify(self, verifications: list[str] | None = None) -> VerificationResult:
         """Validate that a given domain presents a complete chain of certificates, and optionally verify the chain.
 
         Args:
-            verifications (list[VerificationType], optional): The verifications to perform. If None, all possible
+            verifications (list[str], optional): The verifications to perform. If None, all possible
             verifications are performed.
 
         Raises:
@@ -121,22 +119,19 @@ class CertVerifier:
             VerificationResult: The result of the operation
 
         """
-        do_all = verifications is None
         result = VerificationResult(host=self.host)
 
-        try:
-            chain_certs = self.get_chain()
-        except Exception as err:
-            raise LookupError(f"Problem getting the certificate chain from {self.host}.") from err
+        if verifications is None:
+            verifications = checks.__all__
 
-        if do_all or Verification.HAS_ROOT in verifications:
-            result.results.append(self._verify_chain_has_root(chain_certs))
+        guard.all_values_are_valid_verifications(verifications)
 
-        if do_all or Verification.ALL_SIGNED_BY_ANY in verifications:
-            result.results.append(verify_cert_chain_all_signed_by_any(chain_certs, self.get_trusted_certs()))
+        trusted_certs = self.get_trusted_certs()
+        chain_certs = self.get_chain()
 
-        if do_all or Verification.FULL_CRYPTOGRAPHIC in verifications:
-            result.results.append(verify_full_cryptographic(self.host, chain_certs, self.get_trusted_certs()))
+        for check in verifications:
+            func = getattr(checks, check)
+            result.results.append(func(host=self.host, chain_certs=chain_certs, trusted_certs=trusted_certs))
 
         return result
 
@@ -152,6 +147,7 @@ class CertVerifier:
             return self._trust_store
 
         logger.debug("Loading trusted certs")
+
         if self.trust is None:
             logger.warning("Trust store set to an empty list since no trust was supplied")
             self._trust_store = []
@@ -162,10 +158,9 @@ class CertVerifier:
         elif isinstance(self.trust, list):
             if not all((isinstance(x, Certificate) for x in self.trust)):
                 raise ValueError("Trust entries given as a list must all be x509.Certificate objects")
-
             self._trust_store = self.trust
 
-        elif isinstance(self.trust, Path):
+        elif isinstance(self.trust, (Path, str)):
             self._trust_store = ops.get_trusted_certs_from_path(self.trust)
 
         elif self._trust_store is None:
@@ -184,14 +179,17 @@ class CertVerifier:
             list[Certificate]: A list of Certificate objects that make up the leaf and intermediates in the chain.
 
         """
-        return ops.get_chain(
-            host=self.host,
-            port=self.port,
-            proxy_host=self.proxy_host,
-            proxy_port=self.proxy_port,
-            fallback=self.fallback,
-            timeout=self.timeout,
-        )
+        try:
+            return ops.get_chain(
+                host=self.host,
+                port=self.port,
+                proxy_host=self.proxy_host,
+                proxy_port=self.proxy_port,
+                fallback=self.fallback,
+                timeout=self.timeout,
+            )
+        except Exception as err:
+            raise LookupError(f"Problem getting the certificate chain from {self.host}.") from err
 
     def get_root(self, chain_certs: list[Certificate]) -> Certificate | None:
         """Get the root certificate from a list of certs.
@@ -206,33 +204,6 @@ class CertVerifier:
 
         trusted_certs = self.get_trusted_certs()
         return ops.get_root(certs=chain_certs, trusted_certs=trusted_certs)
-
-    def _verify_chain_has_root(self, chain_certs: list[Certificate]) -> SingleVerification:
-        """Verify that a given chain, plus the contents of the trust store, can result in finding a valid root.
-
-        Without a trust store, this can only pass if the server presents a root certificate in its chain, which
-        may actually violate some standards.
-
-        Args:
-            chain_certs (list[Certificate]): The chain presented by the server
-
-        Returns:
-            SingleVerification: The result of the verification
-
-        """
-        result = SingleVerification(Verification.HAS_ROOT)
-        root = self.get_root(chain_certs)
-        if root:
-            result.passed = True
-            result.message = f"Found root certificate {root.subject.rfc4514_string()}"
-            return result
-
-        result.message = (
-            "The root certificate could not be identified. "
-            "The certificate chain does not contain a root and none of the certificates in the trust store were used "
-            "to sign any certificate in the chain."
-        )
-        return result
 
     def __setattr__(self, name, value):
         """Intercept calls to update the trust since we cache the trust and otherwise the new value wouldn't be used."""

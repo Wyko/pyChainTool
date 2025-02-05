@@ -1,41 +1,18 @@
 """Models used by the tools."""
 
 from dataclasses import dataclass, field
-from enum import StrEnum, auto
-
-
-class Verification(StrEnum):
-    """The types of verification to perform on the certificate."""
-
-    HAS_ROOT = auto()
-    "Verify that we can find a root certificate for the presented chain."
-
-    HAS_INTERMEDIATES = auto()
-    """Verify that the chain presents at least two certificates, not counting the root (if it is available). One
-    certificate must be the leaf, and the rest must be intermediate (non-self-signed) certificates. All but one
-    certificate must be signed by another available certificate (the last certificate is assumed to be signed by 
-    the root)."""
-
-    ALL_SIGNED_BY_ANY = auto()
-    """Verify that each certificate is signed by another available certificate, up to and including the root
-    which should sign itself."""
-
-    FULL_CRYPTOGRAPHIC = auto()
-    """Verify the certificate using Cryptography's server verifier module. 
-    This should be the most complete verification possible.
-    """
 
 
 @dataclass
 class SingleVerification:
     """The result of a single validation operation."""
 
-    verification_type: Verification
+    verification_name: str
     passed: bool = False
     message: str | None = None
 
     def __rich_repr__(self):  # noqa: PLW3201
-        yield self.verification_type.capitalize()
+        yield self.verification_name.capitalize()
         yield "Passed", self.passed
         yield "Message", self.message, None
 

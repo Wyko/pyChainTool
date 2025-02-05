@@ -1,16 +1,18 @@
-"""A verifier function for use in the top-level CertVerifier class."""
+"""Verify the validity of the certificate and chain using Cryptography."""
 
 from cryptography.x509 import Certificate, DNSName
 from cryptography.x509.verification import PolicyBuilder, Store
 
 from pyChainTool.logs import get_logger
-from pyChainTool.models import SingleVerification, Verification
+from pyChainTool.models import SingleVerification
 
 logger = get_logger(__name__)
 
+__all__ = ["full_cryptographic"]
 
-def verify_full_cryptographic(
-    host: str, chain_certs: list[Certificate], trusted_certs: list[Certificate]
+
+def full_cryptographic(
+    host: str, chain_certs: list[Certificate], trusted_certs: list[Certificate], **_
 ) -> SingleVerification:
     """Verify the validity of the certificate and chain using Cryptography.
 
@@ -24,7 +26,7 @@ def verify_full_cryptographic(
 
     """
     logger.debug("Starting full cryptographic verification.")
-    result = SingleVerification(verification_type=Verification.FULL_CRYPTOGRAPHIC)
+    result = SingleVerification("full_cryptographic")
 
     try:
         store = Store(trusted_certs)  # @IgnoreException

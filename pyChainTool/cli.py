@@ -4,10 +4,12 @@ import logging
 from typing import Annotated
 
 import rich
+import rich.padding
 import typer
+from rich.padding import Padding
 from typer import Typer
 
-from pyChainTool import logs
+from pyChainTool import checks, logs
 from pyChainTool.main import CertVerifier, Verification
 
 app = Typer()
@@ -18,7 +20,7 @@ def verify(
     host: Annotated[
         str, typer.Argument(help="The hostname/URL of the remote host to download the certificate and chain from.")
     ],
-    checks: Annotated[
+    verifications: Annotated[
         list[Verification],
         typer.Option(
             "--check",
@@ -40,18 +42,27 @@ def verify(
             "--trust",
             "-t",
             show_default=True,
-            help="""The trusted certificates to use to validate the chain loaded from the remote host. 
-
-            If you specify "certifi"`, then the `certifi` package is used to establish a trust store using a set of
-            default certificates from Mozilla. Any other string is interpreted as a filepath. This filepath should
-            point to a folder containing certificates in PEM format. 
-
-            If this option is not specified, no trust store will be used. The server must supply a root certificate 
-                itself to validate chain signing, and the connection will probably fail any strict validation since 
-                no certificate is trusted. This can still be useful to pass some basic verifications.
+            help="""The trusted certificates to use to validate the chain loaded from the remote host. This should be
+            a file path pointing to a folder containing certificates in PEM format. If this option is not 
+            specified, the default is to use the certificates supplied by the certifi package, which uses the Mozilla
+            default certificates.
             """,
         ),
-    ] = None,
+    ] = "certifi",
+    no_trust: Annotated[
+        bool,
+        typer.Option(
+            "--no-trust",
+            "-n",
+            help=(
+                """If this option is specified, no trust store will be used. The server must supply a root certificate 
+                itself to validate chain signing, and the connection will probably fail any strict validation since 
+                no certificate is trusted. This can still be useful to pass some basic verifications.
+                This option overrides the trust option if it is supplied.
+                """
+            ),
+        ),
+    ] = False,
     proxy_host: Annotated[
         str,
         typer.Option(
@@ -85,12 +96,34 @@ def verify(
         fallback=fallback,
         proxy_host=proxy_host,
         proxy_port=proxy_port,
-        trust=trust,
+        trust=trust if no_trust is False else None,
     )
 
-    r = verifier.verify(verifications=checks)
+    try:
+        r = verifier.verify(verifications=verifications)
+    except Exception as err:
+        rich.print("[bold red]Errors during checks")
+        rich.print(f"[i]The log file may have more info, found in {logs.OUTPUT_DIR}")
+        exceptions = []
+        while err:
+            exceptions.append(err)
+            err = err.__cause__
+        for ex in reversed(exceptions):
+            rich.print(rich.padding.Padding(f"[bold]- {type(ex).__name__}[/bold]: {ex}", (0, 0, 0, 2)))
+
+        return
 
     rich.print(r.results)
+
+
+@app.command(name="list")
+def list_verifiers():
+    """List the available verification checks."""
+    verifiers = checks.get_verifiers()
+    rich.print("[bold]Available Verifiers")
+    rich.print("[i]Use these as values passed to [bold]--check[/bold].")
+    for k, v in verifiers.items():
+        rich.print(Padding(f"- [bold]{k}[/bold]: {v}", pad=(0, 0, 0, 2)))
 
 
 if __name__ == "__main__":
